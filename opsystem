@@ -1,34 +1,145 @@
+import sys
+
+class Directory:
+    def __init__ (self):
+        self.contacts = []
+
+    def add_contact(self, contact):
+        self.contacts.append(contact)
+    
+    def display_contacts(self):
+        if not self.contacts:
+            print("No contacts in Directory.")
+        else:
+            for contact in self.contacts:
+                print(contact)
+
+    def retrieve_contact(self, query):
+        matching_contacts = []
+        for contact in self.contacts:
+            if query.lower() in contact['first_name'].lower() or \
+                query.lower() in contact['last_name'].lower() or query in contact.get('phone', '') or \
+                query in contact.get('birthday'):
+                matching_contacts.append(contact)
+        return matching_contacts
+   
+    def edit_contact(self, contact_name, new_first_name, new_last_name, new_phone, new_birthday):
+         for contact in self.contacts:
+             if contact['first_name'] == contact_name:
+                 contact['first_name'] = new_first_name
+                 contact['last_name'] = new_last_name
+                 contact['phone'] = new_phone
+                 contact['birthday'] = new_birthday
+                 return True
+         return False
+         
+    def search_contact(self, query):
+        matching_contacts = []
+        for contact in self.contacts:
+            if query.lower() in contact['first_name'].lower() or query.lower() in contact['last_name'].lower() or query in contact.get('phone', '') or query in contact.get('birthday'):
+                matching_contacts.append(contact)
+        return matching_contacts
+    
+    def add_birthday(self, birthday):
+        self.contacts.append(birthday)
+
+    def exit(self):
+        print("Exiting.")
+
 def menu():
     print("*****")
-    print("Phone Directory", flush=False)
+    print("Phone Directory")
     print("Please select from one of the following operations.")
     print("1. Add a new contact")
-    print("2. Retrieve contact")
-    print("3. Edit contact")
-    print("4. Search for a contact")
+    print("2. View contacts")
+    print("3. Retrieve contact")
+    print("4. Edit contact")
+    print("5. Search for a contact")
+    print("6. Exit. ")
     
     choice = int(input("Please select your choice: "))
     
     return choice
-    
-menu()
 
-def add_contact(contact: dict):
-    phone_book = []
-    
-print("Please enter the contact you wish to add:\n ")
-first_name = input("Please enter the first name: ")
-last_name = input("Please enter the last name: ")
-phone = input("Please enter the phone number: ")
+def add_contact(directory):    
+    print("Please enter the contact you wish to add:\n ")
+    first_name = input("Please enter the first name: ")
+    last_name = input("Please enter the last name: ")
+    phone = input("Please enter the phone number: ")
+    birthday = input("Please input the birthday: ")
 
-contact = {
-    "first_name": first_name,
-    "last_name": last_name,
-    "phone": phone
-}
+    contact = {
+        "first_name": first_name,
+        "last_name": last_name,
+        "phone": phone,
+        "birthday": birthday
+    }
 
-add_contact(contact)
+    directory.add_contact(contact)
 
-#def retrieve_contact():
-#def edit_contact():
-#def search_contact():
+def retrieve_contact(directory):
+    query = input("Enter the contact you wish to retrieve: ")
+    found_contacts = directory.retrieve_contact(query)
+
+    if found_contacts:
+        print("Contact(s) found:")
+        for contact in found_contacts:
+            print(contact)
+    else:
+        print("Contact not found.")
+
+def edit_contact(directory):
+    contact_name = input("Enter the name of the contact you want to edit: ")
+    new_first_name = input("Enter new first name: ")
+    new_last_name = input ("Enter the new last name: ")
+    new_phone = input("Enter new phone number: ")
+    new_birthday = input("Edit birthday: ")
+
+    if directory.edit_contact(contact_name, new_first_name, new_last_name, new_phone, new_birthday):
+        print("Contact edited successfully.")
+
+    else:
+        print("Contact not found.")
+
+def search_contact(directory):
+    query = input("Enter the search information: ")
+    matching_contacts = directory.search_contact(query)
+
+    if matching_contacts:
+        print("Matching contact(s) found:")
+        for contact in matching_contacts:
+            print(contact)
+    else:
+        print("No matching contacts found.")
+
+def options(): 
+    directory = Directory()
+
+    while True:
+        choice = menu()
+        
+        if choice == 1:
+            add_contact(directory)
+            print("Contact added successfully.")
+
+        elif choice == 2:
+            directory.display_contacts()            
+
+        elif choice == 3:
+            retrieve_contact(directory)
+
+        elif choice == 4:
+            edit_contact(directory)
+            
+        elif choice == 5:
+            search_contact(directory)
+
+        elif choice == 6:
+            print("Thank you! Now exiting.")
+            break
+               
+        else:
+                print("Invalid choice. Please select again.")
+
+if __name__ == "__main__":
+    options()
