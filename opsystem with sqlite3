@@ -29,9 +29,6 @@ class Directory:
         contacts = c.fetchall()
         conn.close()
 
-       # if not contacts:
-        #    print("No contacts in Directory.")
-        #else:
         for contact in contacts:
             print(contact)
             
