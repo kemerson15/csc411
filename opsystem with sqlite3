@@ -1,47 +1,74 @@
+import sqlite3
 import sys
+
+if not ('phone_directory.db'):
+    conn = sqlite3.connect('phone_directory.db')
+    c = conn.cursor()
+
+    c.execute('''CREATE TABLE contacts
+                    (first_name text, last_name text, phone test, birthday text)''')
+
+    conn.commit()
+    conn.close()
 
 class Directory:
     def __init__ (self):
         self.contacts = []
 
     def add_contact(self, contact):
-        self.contacts.append(contact)
-    
+        conn = sqlite3.connect('phone_directory.db')
+        c = conn.cursor()
+        c.execute("INSERT INTO contacts VALUES (?, ?, ?, ?)", (contact['first_name'], contact['last_name'], contact['phone'], contact['birthday']))
+        conn.commit()
+        conn.close()    
+        
     def display_contacts(self):
-        if not self.contacts:
-            print("No contacts in Directory.")
-        else:
-            for contact in self.contacts:
-                print(contact)
+        conn = sqlite3.connect('phone_directory.db')
+        c = conn.cursor()
+        c.execute("SELECT * FROM contacts")
+        contacts = c.fetchall()
+        conn.close()
 
+       # if not contacts:
+        #    print("No contacts in Directory.")
+        #else:
+        for contact in contacts:
+            print(contact)
+            
     def retrieve_contact(self, query):
-        matching_contacts = []
-        for contact in self.contacts:
-            if query.lower() in contact['first_name'].lower() or \
-                query.lower() in contact['last_name'].lower() or query in contact.get('phone', '') or \
-                query in contact.get('birthday'):
-                matching_contacts.append(contact)
+        conn = sqlite3.connect('phone_directory.db')
+        c = conn.cursor()
+        c.execute("SELECT * FROM contacts WHERE first_name LIKE ? OR last_name LIKE ? OR phone = ? OR birthday = ?", ('%' + query + '%', '%' + query + '%', query, query))
+        matching_contacts = c.fetchall()
+        conn.close()
         return matching_contacts
    
     def edit_contact(self, contact_name, new_first_name, new_last_name, new_phone, new_birthday):
-         for contact in self.contacts:
-             if contact['first_name'] == contact_name:
-                 contact['first_name'] = new_first_name
-                 contact['last_name'] = new_last_name
-                 contact['phone'] = new_phone
-                 contact['birthday'] = new_birthday
-                 return True
-         return False
+         conn = sqlite3.connect('phone_directory.db')
+         c = conn.cursor()
+         c.execute("UPDATE contacts SET first_name=?, last_name=?, phone=?, birthday=? WHERE first_name=?", (new_first_name, new_last_name, new_phone, new_birthday, contact_name))
+         conn.commit()
+         conn.close()
+
+         return True
          
     def search_contact(self, query):
-        matching_contacts = []
-        for contact in self.contacts:
-            if query.lower() in contact['first_name'].lower() or query.lower() in contact['last_name'].lower() or query in contact.get('phone', '') or query in contact.get('birthday'):
-                matching_contacts.append(contact)
+        conn = sqlite3.connect('phone_directory.db')
+        c = conn.cursor()
+        c.execute("SELECT * FROM contacts WHERE first_name LIKE ? OR last_name LIKE ? OR phone = ? OR birthday = ?", ('%' + query + '%', '%' + query + '%', query, query))
+        matching_contacts = c.fetchall()
+        conn.close()
         return matching_contacts
     
     def add_birthday(self, birthday):
         self.contacts.append(birthday)
+
+    def delete_contact(self, query):
+        conn = sqlite3.connect('phone_directory.db')
+        c = conn.cursor()
+        c.execute("DELETE FROM contacts WHERE first_name LIKE ? OR last_name LIKE ? OR phone = ? OR birthday = ?", ('%' + query + '%', '%' + query + '%', query, query))
+        conn.commit()
+        conn.close()
 
     def exit(self):
         print("Exiting.")
@@ -55,7 +82,8 @@ def menu():
     print("3. Retrieve contact")
     print("4. Edit contact")
     print("5. Search for a contact")
-    print("6. Exit. ")
+    print("6. Delete contact.")
+    print("7. Exit. ")
     
     choice = int(input("Please select your choice: "))
     
@@ -112,6 +140,15 @@ def search_contact(directory):
     else:
         print("No matching contacts found.")
 
+def delete_contact(directory):
+    query = input("Enter the contact you wish to remove: ")
+    directory.delete_contact(query)
+
+    if query not in directory.contacts:
+        print("Contact is not in directory.")
+    else:
+         print("Contact removed successfully.")
+
 def options(): 
     directory = Directory()
 
@@ -135,6 +172,9 @@ def options():
             search_contact(directory)
 
         elif choice == 6:
+            delete_contact(directory)
+
+        elif choice == 7:
             print("Thank you! Now exiting.")
             break
                
