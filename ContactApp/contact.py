@@ -110,23 +110,18 @@ class ContactWidget(QWidget):
         # Format birthday
         birthday = f"{birthday_month}-{birthday_day}-{year}"
 
-        # Check if the contact is already added
-        contact_info = (first_name, last_name, phone, birthday)
-        if contact_info in self.added_contacts:
-            print(f"Contact {contact_info} is already added.")
-            return
-
         # Add contact to the database
-        self.database.add_contact(first_name, last_name, phone, birthday)
-        
-        # Update the contacts list
-        self.update_contacts_list()
-        
-        # Add the contact information tuple to the set of added contacts
-        self.added_contacts.add(contact_info)
-        
-        # Close the dialog
-        dialog.accept()
+        try:
+            self.database.add_contact(first_name, last_name, phone, birthday)
+            # Update the contacts list
+            self.update_contacts_list()
+            # Add the contact information tuple to the set of added contacts
+            self.added_contacts.add((first_name, last_name, phone, birthday))
+            # Close the dialog
+            dialog.accept()
+            return True  # Return True to indicate success
+        except:
+            return False  # Return False if an error occurs
 
     def update_contacts_list(self):
         # Retrieve all contacts from the database
